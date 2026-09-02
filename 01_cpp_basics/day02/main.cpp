@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 class Servo
 {
@@ -63,21 +64,23 @@ private:
 
 int main()
 {
-    Servo servo(
-        1,
-        -1.0,
-        1.0
-    );
+    std::vector<Servo> servos;
 
-    servo.printState();
+    servos.emplace_back(1, -1.0, 1.0);
+    servos.emplace_back(2, -1.5, 0.0);
+    servos.emplace_back(3, -0.8, 0.8);
 
-    std::cout << std::endl;
+    servos[0].setTargetPosition(0.3);
+    servos[1].setTargetPosition(-0.6);
+    servos[2].setTargetPosition(0.3);
 
-    servo.setTargetPosition(0.5);
+    servos[0].update();
+    servos[1].update();
+    servos[2].update();
 
-    servo.update();
-
-    servo.printState();
+    servos[0].printState();
+    servos[1].printState();
+    servos[2].printState();
 
     return 0;
 }

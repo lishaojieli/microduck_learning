@@ -1,0 +1,26 @@
+#pragma once
+
+class Servo
+{
+public:
+    Servo(
+        int id,
+        double min_position,
+        double max_position
+    );
+
+    void setTargetPosition(double target_position);
+
+    void update();
+
+    void printState() const;
+
+private:
+    int id_;
+
+    double current_position_;
+    double target_position_;
+
+    double min_position_;
+    double max_position_;
+};

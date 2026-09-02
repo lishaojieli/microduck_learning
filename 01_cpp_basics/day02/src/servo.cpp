@@ -5,13 +5,15 @@
 Servo::Servo(
     int id,
     double min_position,
-    double max_position
+    double max_position,
+    double max_velocity
 )
     : id_(id),
       current_position_(0.0),
       target_position_(0.0),
       min_position_(min_position),
-      max_position_(max_position)
+      max_position_(max_position),
+      max_velocity_(max_velocity)
 {
 }
 
@@ -31,9 +33,26 @@ void Servo::setTargetPosition(double target_position)
     }
 }
 
-void Servo::update()
+void Servo::update(double dt)
 {
-    current_position_ = target_position_;
+    double error =
+        target_position_ - current_position_;
+
+    double max_step =
+        max_velocity_ * dt;
+
+    if (error > max_step)
+    {
+        current_position_ += max_step;
+    }
+    else if (error < -max_step)
+    {
+        current_position_ -= max_step;
+    }
+    else
+    {
+        current_position_ = target_position_;
+    }
 }
 
 void Servo::printState() const

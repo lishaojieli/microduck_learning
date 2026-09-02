@@ -6,12 +6,13 @@ public:
     Servo(
         int id,
         double min_position,
-        double max_position
+        double max_position,
+        double max_velocity
     );
 
     void setTargetPosition(double target_position);
 
-    void update();
+    void update(double dt);
 
     void printState() const;
 
@@ -26,4 +27,6 @@ private:
 
     double min_position_;
     double max_position_;
+
+    double max_velocity_;
 };

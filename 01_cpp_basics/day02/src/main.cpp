@@ -1,25 +1,37 @@
 #include "robot.hpp"
 
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 int main()
 {
     Robot robot;
 
-    robot.setJointTarget(Joint::LeftHip, 0.3);
-    robot.setJointTarget(Joint::LeftKnee, -0.6);
-    robot.setJointTarget(Joint::LeftAnkle, 0.3);
+    robot.setJointTarget(Joint::LeftHip, 0.8);
+    robot.setJointTarget(Joint::LeftKnee, -1.0);
+    robot.setJointTarget(Joint::LeftAnkle, 0.4);
 
-    robot.update();
+    const double dt = 0.02;
 
-    double left_knee =
-        robot.getJointPosition(Joint::LeftKnee);
+    for (int i = 0; i < 100; ++i)
+    {
+        robot.update(dt);
 
-    std::cout
-        << "Left knee position: "
-        << left_knee
-        << " rad"
-        << std::endl;
+        double hip =
+            robot.getJointPosition(Joint::LeftHip);
+
+        std::cout
+            << "Step " << i
+            << " | Left hip: "
+            << hip
+            << " rad"
+            << std::endl;
+
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(20)
+        );
+    }
 
     return 0;
 }

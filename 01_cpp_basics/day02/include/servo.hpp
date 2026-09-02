@@ -15,6 +15,9 @@ public:
 
     void printState() const;
 
+    double getCurrentPosition() const;
+    double getTargetPosition() const;
+
 private:
     int id_;
 

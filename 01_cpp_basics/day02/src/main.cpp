@@ -1,20 +1,25 @@
 #include "robot.hpp"
 
+#include <iostream>
+
 int main()
 {
     Robot robot;
 
-    robot.setJointTarget(0, 0.3);
-    robot.setJointTarget(1, -0.6);
-    robot.setJointTarget(2, 0.3);
-
-    robot.setJointTarget(3, -0.3);
-    robot.setJointTarget(4, -0.6);
-    robot.setJointTarget(5, -0.3);
+    robot.setJointTarget(Joint::LeftHip, 0.3);
+    robot.setJointTarget(Joint::LeftKnee, -0.6);
+    robot.setJointTarget(Joint::LeftAnkle, 0.3);
 
     robot.update();
 
-    robot.printState();
+    double left_knee =
+        robot.getJointPosition(Joint::LeftKnee);
+
+    std::cout
+        << "Left knee position: "
+        << left_knee
+        << " rad"
+        << std::endl;
 
     return 0;
 }

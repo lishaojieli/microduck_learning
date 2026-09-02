@@ -16,11 +16,32 @@ Robot::Robot()
 }
 
 void Robot::setJointTarget(
-    int joint_index,
+    Joint joint,
     double target_position
 )
 {
-    servos_[joint_index].setTargetPosition(target_position);
+    int index = static_cast<int>(joint);
+
+    if (index < 0 || index >= static_cast<int>(servos_.size()))
+    {
+        std::cout << "Invalid joint index!" << std::endl;
+        return;
+    }
+
+    servos_[index].setTargetPosition(target_position);
+}
+
+double Robot::getJointPosition(Joint joint) const
+{
+    int index = static_cast<int>(joint);
+
+    if (index < 0 || index >= static_cast<int>(servos_.size()))
+    {
+        std::cout << "Invalid joint index!" << std::endl;
+        return 0.0;
+    }
+
+    return servos_[index].getCurrentPosition();
 }
 
 void Robot::update()
@@ -36,7 +57,6 @@ void Robot::printState() const
     for (const Servo& servo : servos_)
     {
         servo.printState();
-
         std::cout << std::endl;
     }
 }

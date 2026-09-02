@@ -52,3 +52,13 @@ void Servo::printState() const
               << " rad"
               << std::endl;
 }
+
+double Servo::getCurrentPosition() const
+{
+    return current_position_;
+}
+
+double Servo::getTargetPosition() const
+{
+    return target_position_;
+}

@@ -25,8 +25,8 @@ public:
     );
 
     double getJointPosition(Joint joint) const;
-    
-    void update();
+
+    void update(double dt);
 
     void printState() const;
 

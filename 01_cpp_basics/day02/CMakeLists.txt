@@ -8,6 +8,7 @@ add_executable(
     microduck_day02
     src/main.cpp
     src/servo.cpp
+    src/robot.cpp
 )
 
 target_include_directories(

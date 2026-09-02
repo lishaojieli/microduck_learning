@@ -17,12 +17,14 @@ public:
     void printState() const;
 
     double getCurrentPosition() const;
+    double getCurrentVelocity() const;
     double getTargetPosition() const;
 
 private:
     int id_;
 
     double current_position_;
+    double current_velocity_;
     double target_position_;
 
     double min_position_;

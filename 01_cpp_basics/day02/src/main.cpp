@@ -33,5 +33,20 @@ int main()
         );
     }
 
+    RobotState state = robot.getState();
+
+    for (std::size_t i = 0; i < state.positions.size(); ++i)
+    {
+    std::cout
+        << "Joint " << i
+        << " | position = "
+        << state.positions[i]
+        << " rad"
+        << " | velocity = "
+        << state.velocities[i]
+        << " rad/s"
+        << std::endl;
+    }
+
     return 0;
 }

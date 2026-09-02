@@ -10,6 +10,7 @@ Servo::Servo(
 )
     : id_(id),
       current_position_(0.0),
+      current_velocity_(0.0),
       target_position_(0.0),
       min_position_(min_position),
       max_position_(max_position),
@@ -35,6 +36,8 @@ void Servo::setTargetPosition(double target_position)
 
 void Servo::update(double dt)
 {
+    double old_position = current_position_;
+
     double error =
         target_position_ - current_position_;
 
@@ -53,6 +56,9 @@ void Servo::update(double dt)
     {
         current_position_ = target_position_;
     }
+
+    current_velocity_ =
+        (current_position_ - old_position) / dt;
 }
 
 void Servo::printState() const
@@ -70,6 +76,11 @@ void Servo::printState() const
               << target_position_
               << " rad"
               << std::endl;
+    
+    std::cout << "Current velocity: "
+          << current_velocity_
+          << " rad/s"
+          << std::endl;
 }
 
 double Servo::getCurrentPosition() const
@@ -80,4 +91,9 @@ double Servo::getCurrentPosition() const
 double Servo::getTargetPosition() const
 {
     return target_position_;
+}
+
+double Servo::getCurrentVelocity() const
+{
+    return current_velocity_;
 }

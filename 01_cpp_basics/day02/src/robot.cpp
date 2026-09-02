@@ -60,3 +60,21 @@ void Robot::printState() const
         std::cout << std::endl;
     }
 }
+
+RobotState Robot::getState() const
+{
+    RobotState state;
+
+    for (const Servo& servo : servos_)
+    {
+        state.positions.push_back(
+            servo.getCurrentPosition()
+        );
+
+        state.velocities.push_back(
+            servo.getCurrentVelocity()
+        );
+    }
+
+    return state;
+}

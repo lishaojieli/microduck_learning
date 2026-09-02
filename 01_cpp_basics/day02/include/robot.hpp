@@ -14,6 +14,12 @@ enum class Joint
     RightAnkle
 };
 
+struct RobotState
+{
+    std::vector<double> positions;
+    std::vector<double> velocities;
+};
+
 class Robot
 {
 public:
@@ -27,6 +33,8 @@ public:
     double getJointPosition(Joint joint) const;
 
     void update(double dt);
+
+    RobotState getState() const;
 
     void printState() const;
 

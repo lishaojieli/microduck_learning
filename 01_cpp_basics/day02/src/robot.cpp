@@ -99,3 +99,24 @@ RobotState Robot::getState() const
 
     return state;
 }
+
+void Robot::setCommand(const RobotCommand& command)
+{
+    if (command.joint_targets.size() != servos_.size())
+    {
+        std::cout
+            << "Invalid command size!"
+            << std::endl;
+
+        return;
+    }
+
+    for (std::size_t i = 0;
+         i < servos_.size();
+         ++i)
+    {
+        servos_[i].setTargetPosition(
+            command.joint_targets[i]
+        );
+    }
+}

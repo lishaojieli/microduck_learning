@@ -8,15 +8,19 @@ int main()
 {
     Robot robot;
 
-    robot.setJointTarget(
-        Joint::LeftHip,
-        0.8
-    );
+    RobotCommand command;
 
-    robot.setJointTarget(
-        Joint::RightHip,
-        0.6
-    );
+    command.joint_targets =
+    {
+        0.3,
+        -0.6,
+        0.3,
+        -0.3,
+        -0.6,
+        -0.3
+    };
+
+    robot.setCommand(command);
 
     const double dt = 0.02;
 
@@ -28,19 +32,22 @@ int main()
             robot.getState();
 
         std::cout
-            << "Step: "
+            << "Step "
             << i
             << std::endl;
 
-        std::cout
-            << "Left hip: "
-            << state.positions[
-                   static_cast<int>(
-                       Joint::LeftHip
-                   )
-               ]
-            << " rad"
-            << std::endl;
+        for (std::size_t j = 0;
+             j < state.positions.size();
+             ++j)
+        {
+            std::cout
+                << "Joint "
+                << j
+                << ": "
+                << state.positions[j]
+                << " rad"
+                << std::endl;
+        }
 
         std::cout
             << "Pitch: "

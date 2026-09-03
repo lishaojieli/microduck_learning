@@ -18,6 +18,8 @@ struct RobotState
 {
     std::vector<double> positions;
     std::vector<double> velocities;
+
+    ImuState imu;
 };
 
 class Robot
@@ -40,4 +42,17 @@ public:
 
 private:
     std::vector<Servo> servos_;
+
+    ImuState imu_;
+};
+
+struct ImuState
+{
+    double roll;
+    double pitch;
+    double yaw;
+
+    double angular_velocity_x;
+    double angular_velocity_y;
+    double angular_velocity_z;
 };

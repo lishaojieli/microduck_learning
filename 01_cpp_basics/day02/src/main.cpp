@@ -8,9 +8,15 @@ int main()
 {
     Robot robot;
 
-    robot.setJointTarget(Joint::LeftHip, 0.8);
-    robot.setJointTarget(Joint::LeftKnee, -1.0);
-    robot.setJointTarget(Joint::LeftAnkle, 0.4);
+    robot.setJointTarget(
+        Joint::LeftHip,
+        0.8
+    );
+
+    robot.setJointTarget(
+        Joint::RightHip,
+        0.6
+    );
 
     const double dt = 0.02;
 
@@ -18,34 +24,35 @@ int main()
     {
         robot.update(dt);
 
-        double hip =
-            robot.getJointPosition(Joint::LeftHip);
+        RobotState state =
+            robot.getState();
 
         std::cout
-            << "Step " << i
-            << " | Left hip: "
-            << hip
+            << "Step: "
+            << i
+            << std::endl;
+
+        std::cout
+            << "Left hip: "
+            << state.positions[
+                   static_cast<int>(
+                       Joint::LeftHip
+                   )
+               ]
             << " rad"
             << std::endl;
+
+        std::cout
+            << "Pitch: "
+            << state.imu.pitch
+            << " rad"
+            << std::endl;
+
+        std::cout << std::endl;
 
         std::this_thread::sleep_for(
             std::chrono::milliseconds(20)
         );
-    }
-
-    RobotState state = robot.getState();
-
-    for (std::size_t i = 0; i < state.positions.size(); ++i)
-    {
-    std::cout
-        << "Joint " << i
-        << " | position = "
-        << state.positions[i]
-        << " rad"
-        << " | velocity = "
-        << state.velocities[i]
-        << " rad/s"
-        << std::endl;
     }
 
     return 0;

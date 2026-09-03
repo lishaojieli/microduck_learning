@@ -3,6 +3,14 @@
 #include <iostream>
 
 Robot::Robot()
+    : imu_{
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+      }
 {
     // 左腿
     servos_.emplace_back(1, -1.0, 1.0, 1.0);
@@ -50,6 +58,17 @@ void Robot::update(double dt)
     {
         servo.update(dt);
     }
+
+    double left_hip =
+        servos_[static_cast<int>(Joint::LeftHip)]
+            .getCurrentPosition();
+
+    double right_hip =
+        servos_[static_cast<int>(Joint::RightHip)]
+            .getCurrentPosition();
+
+    imu_.pitch =
+        (left_hip + right_hip) * 0.1;
 }
 
 void Robot::printState() const
@@ -75,6 +94,8 @@ RobotState Robot::getState() const
             servo.getCurrentVelocity()
         );
     }
+
+    state.imu = imu_;
 
     return state;
 }

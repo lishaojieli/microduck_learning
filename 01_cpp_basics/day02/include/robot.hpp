@@ -43,7 +43,18 @@ class Robot
 public:
     Robot();
 
-    void setCommand(const RobotCommand& command);
+    void setJointTarget(
+        Joint joint,
+        double target_position
+    );
+
+    double getJointPosition(
+        Joint joint
+    ) const;
+
+    void setCommand(
+        const RobotCommand& command
+    );
 
     void update(double dt);
 

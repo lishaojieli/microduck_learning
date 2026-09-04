@@ -7,12 +7,18 @@
 class Controller
 {
 public:
-    Controller();
+    Controller(
+        double kp,
+        double kd
+    );
 
     RobotCommand computeCommand(
         const RobotState& state
     );
 
 private:
-    std::vector<double> target_positions_;
+    double kp_;
+    double kd_;
+
+    std::vector<double> desired_positions_;
 };

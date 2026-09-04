@@ -1,92 +1,23 @@
+#include "control_loop.hpp"
 #include "controller.hpp"
 #include "robot.hpp"
-
-#include <chrono>
-#include <iostream>
-#include <thread>
-#include <vector>
 
 int main()
 {
     Robot robot;
 
     Controller controller(
-        1.5,
+        0.5,
         0.1
     );
 
-    const std::vector<double> standing_pose =
-    {
-        0.3,
-        -0.6,
-        0.3,
-        -0.3,
-        -0.6,
-        -0.3
-    };
-
-    const std::vector<double> squat_pose =
-    {
-        0.5,
-        -1.2,
-        0.5,
-        -0.5,
-        -1.2,
-        -0.5
-    };
-
-    const double dt = 0.02;
-
-    controller.setDesiredPositions(
-        standing_pose
+    ControlLoop loop(
+        robot,
+        controller,
+        50.0
     );
 
-    for (int step = 0;
-         step < 300;
-         ++step)
-    {
-        if (step == 100)
-        {
-            controller.setDesiredPositions(
-                squat_pose
-            );
-        }
-
-        if (step == 200)
-        {
-            controller.setDesiredPositions(
-                standing_pose
-            );
-        }
-
-        RobotState state =
-            robot.getState();
-
-        RobotCommand command =
-            controller.computeCommand(state);
-
-        robot.setCommand(command);
-
-        robot.update(dt);
-
-        RobotState new_state =
-            robot.getState();
-
-        std::cout
-            << "Step "
-            << step
-            << " | Hip: "
-            << new_state.positions[0]
-            << " | Knee: "
-            << new_state.positions[1]
-            << " | Ankle: "
-            << new_state.positions[2]
-            << std::endl;
-
-        std::this_thread::sleep_for(
-            std::chrono::milliseconds(20)
-        );
-    }
+    loop.run();
 
     return 0;
 }

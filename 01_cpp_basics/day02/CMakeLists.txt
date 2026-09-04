@@ -10,6 +10,7 @@ add_executable(
     src/servo.cpp
     src/robot.cpp
     src/controller.cpp
+    src/control_loop.cpp
 )
 
 target_include_directories(

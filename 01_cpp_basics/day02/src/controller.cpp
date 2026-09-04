@@ -1,5 +1,7 @@
 #include "controller.hpp"
 
+#include <iostream>
+
 Controller::Controller(
     double kp,
     double kd
@@ -8,14 +10,30 @@ Controller::Controller(
       kd_(kd),
       desired_positions_
       {
-          0.3,
-          -0.6,
-          0.3,
-          -0.3,
-          -0.6,
-          -0.3
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
       }
 {
+}
+
+void Controller::setDesiredPositions(
+    const std::vector<double>& positions
+)
+{
+    if (positions.size() != desired_positions_.size())
+    {
+        std::cout
+            << "Invalid desired position size!"
+            << std::endl;
+
+        return;
+    }
+
+    desired_positions_ = positions;
 }
 
 RobotCommand Controller::computeCommand(

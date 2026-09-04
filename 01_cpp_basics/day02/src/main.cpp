@@ -4,14 +4,30 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
+#include <vector>
 
 int main()
 {
     Robot robot;
 
     Controller controller(
-        0.5,   // Kp
-        0.1    // Kd
+        0.5,
+        0.1
+    );
+
+    std::vector<double> standing_pose =
+    {
+        0.3,
+        -0.6,
+        0.3,
+
+        -0.3,
+        -0.6,
+        -0.3
+    };
+
+    controller.setDesiredPositions(
+        standing_pose
     );
 
     const double dt = 0.02;
@@ -38,10 +54,8 @@ int main()
             << step
             << " | Left hip = "
             << new_state.positions[0]
-            << " rad"
-            << " | velocity = "
-            << new_state.velocities[0]
-            << " rad/s"
+            << " | Left knee = "
+            << new_state.positions[1]
             << std::endl;
 
         std::this_thread::sleep_for(

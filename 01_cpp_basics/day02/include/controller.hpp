@@ -12,6 +12,10 @@ public:
         double kd
     );
 
+    void setDesiredPositions(
+        const std::vector<double>& positions
+    );
+
     RobotCommand computeCommand(
         const RobotState& state
     );

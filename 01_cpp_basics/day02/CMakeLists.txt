@@ -11,6 +11,7 @@ add_executable(
     src/robot.cpp
     src/controller.cpp
     src/control_loop.cpp
+    src/motion_manager.cpp
 )
 
 target_include_directories(

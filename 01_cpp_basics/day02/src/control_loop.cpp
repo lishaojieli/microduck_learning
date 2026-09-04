@@ -1,4 +1,9 @@
+#pragma once
+
 #include "control_loop.hpp"
+#include "controller.hpp"
+#include "motion_manager.hpp"
+#include "robot.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -7,10 +12,12 @@
 ControlLoop::ControlLoop(
     Robot& robot,
     Controller& controller,
+    MotionManager& motion_manager,
     double frequency_hz
 )
     : robot_(robot),
       controller_(controller),
+      motion_manager_(motion_manager),
       frequency_hz_(frequency_hz),
       period_seconds_(1.0 / frequency_hz)
 {
@@ -18,32 +25,11 @@ ControlLoop::ControlLoop(
 
 void ControlLoop::run()
 {
-    const std::vector<double> standing_pose =
-    {
-        0.3,
-        -0.6,
-        0.3,
-        -0.3,
-        -0.6,
-        -0.3
-    };
-
-    const std::vector<double> squat_pose =
-    {
-        0.5,
-        -1.2,
-        0.5,
-        -0.5,
-        -1.2,
-        -0.5
-    };
-
-    controller_.setDesiredPositions(
-        standing_pose
-    );
+    auto start_time =
+        std::chrono::steady_clock::now();
 
     auto previous_time =
-        std::chrono::steady_clock::now();
+        start_time;
 
     for (int step = 0;
          step < 300;
@@ -52,8 +38,7 @@ void ControlLoop::run()
         auto loop_start =
             std::chrono::steady_clock::now();
 
-        double dt =
-            period_seconds_;
+        double dt = period_seconds_;
 
         if (step > 0)
         {
@@ -66,38 +51,43 @@ void ControlLoop::run()
         previous_time =
             loop_start;
 
-        if (step == 100)
-        {
-            controller_.setDesiredPositions(
-                squat_pose
-            );
-        }
+        double elapsed_time =
+            std::chrono::duration<double>(
+                loop_start - start_time
+            ).count();
 
-        if (step == 200)
-        {
-            controller_.setDesiredPositions(
-                standing_pose
-            );
-        }
+        // ① 更新运动状态
+        motion_manager_.update(
+            elapsed_time
+        );
 
+        // ② 把当前动作目标交给 Controller
+        controller_.setDesiredPositions(
+            motion_manager_
+                .getDesiredPositions()
+        );
+
+        // ③ 读取机器人状态
         RobotState state =
             robot_.getState();
 
+        // ④ 计算控制命令
         RobotCommand command =
-            controller_.computeCommand(state);
+            controller_
+                .computeCommand(state);
 
+        // ⑤ 下发控制命令
         robot_.setCommand(command);
 
+        // ⑥ 更新机器人
         robot_.update(dt);
 
         RobotState new_state =
             robot_.getState();
 
         std::cout
-            << "Step: "
-            << step
-            << " | dt: "
-            << dt
+            << "Time: "
+            << elapsed_time
             << " | Hip: "
             << new_state.positions[0]
             << " | Knee: "

@@ -9,6 +9,7 @@ add_executable(
     src/main.cpp
     src/servo.cpp
     src/robot.cpp
+    src/controller.cpp
 )
 
 target_include_directories(

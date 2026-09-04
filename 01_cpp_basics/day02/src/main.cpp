@@ -15,23 +15,21 @@ int main()
         0.1
     );
 
-    std::vector<double> standing_pose =
+    const std::vector<double> standing_pose =
     {
         0.3,
         -0.6,
         0.3,
-
         -0.3,
         -0.6,
         -0.3
     };
 
-    std::vector<double> squat_pose =
+    const std::vector<double> squat_pose =
     {
         0.5,
         -1.2,
         0.5,
-
         -0.5,
         -1.2,
         -0.5
@@ -39,17 +37,14 @@ int main()
 
     const double dt = 0.02;
 
+    controller.setDesiredPositions(
+        standing_pose
+    );
+
     for (int step = 0;
          step < 300;
          ++step)
     {
-        if (step == 0)
-        {
-            controller.setDesiredPositions(
-                standing_pose
-            );
-        }
-
         if (step == 100)
         {
             controller.setDesiredPositions(
@@ -80,10 +75,12 @@ int main()
         std::cout
             << "Step "
             << step
-            << " | Left hip = "
+            << " | Hip: "
             << new_state.positions[0]
-            << " | Left knee = "
+            << " | Knee: "
             << new_state.positions[1]
+            << " | Ankle: "
+            << new_state.positions[2]
             << std::endl;
 
         std::this_thread::sleep_for(

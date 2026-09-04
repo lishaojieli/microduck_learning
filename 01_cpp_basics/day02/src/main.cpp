@@ -1,3 +1,4 @@
+#include "controller.hpp"
 #include "robot.hpp"
 
 #include <chrono>
@@ -7,53 +8,42 @@
 int main()
 {
     Robot robot;
-
-    RobotCommand command;
-
-    command.joint_targets =
-    {
-        0.3,
-        -0.6,
-        0.3,
-        -0.3,
-        -0.6,
-        -0.3
-    };
-
-    robot.setCommand(command);
+    Controller controller;
 
     const double dt = 0.02;
 
     for (int i = 0; i < 100; ++i)
     {
-        robot.update(dt);
-
         RobotState state =
             robot.getState();
+
+        RobotCommand command =
+            controller.computeCommand(state);
+
+        robot.setCommand(command);
+
+        robot.update(dt);
 
         std::cout
             << "Step "
             << i
             << std::endl;
 
+        RobotState new_state =
+            robot.getState();
+
         for (std::size_t j = 0;
-             j < state.positions.size();
+             j < new_state.positions.size();
              ++j)
         {
             std::cout
                 << "Joint "
                 << j
                 << ": "
-                << state.positions[j]
+                << new_state.positions[j]
                 << " rad"
                 << std::endl;
         }
-
-        std::cout
-            << "Pitch: "
-            << state.imu.pitch
-            << " rad"
-            << std::endl;
 
         std::cout << std::endl;
 

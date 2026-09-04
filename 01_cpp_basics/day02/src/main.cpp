@@ -40,7 +40,7 @@ int main()
     const double dt = 0.02;
 
     for (int step = 0;
-         step < 200;
+         step < 300;
          ++step)
     {
         if (step == 0)

@@ -11,7 +11,7 @@ int main()
     Robot robot;
 
     Controller controller(
-        1.0,
+        1.5,
         0.1
     );
 
@@ -26,9 +26,16 @@ int main()
         -0.3
     };
 
-    controller.setDesiredPositions(
-        standing_pose
-    );
+    std::vector<double> squat_pose =
+    {
+        0.5,
+        -1.2,
+        0.5,
+
+        -0.5,
+        -1.2,
+        -0.5
+    };
 
     const double dt = 0.02;
 
@@ -36,6 +43,27 @@ int main()
          step < 200;
          ++step)
     {
+        if (step == 0)
+        {
+            controller.setDesiredPositions(
+                standing_pose
+            );
+        }
+
+        if (step == 100)
+        {
+            controller.setDesiredPositions(
+                squat_pose
+            );
+        }
+
+        if (step == 200)
+        {
+            controller.setDesiredPositions(
+                standing_pose
+            );
+        }
+
         RobotState state =
             robot.getState();
 

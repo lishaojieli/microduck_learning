@@ -1,29 +1,40 @@
 #pragma once
 
+#include "robot.hpp"
+
 #include <vector>
 
 enum class MotionState
 {
+    Idle,
     Standing,
     Squatting
 };
 
 class MotionManager
 {
-public:
-    MotionManager();
+    public:
+        MotionManager();
 
-    void update(double time);
+        void update(const RobotState& state);
 
-    const std::vector<double>& getDesiredPositions() const;
+        const std::vector<double>& getDesiredPositions() const;
 
-    MotionState getState() const;
+        MotionState getState() const;
 
-private:
-    MotionState state_;
+    private:
+        bool isPoseReached(
+            const RobotState& state,
+            const std::vector<double>& target
+        ) const;
 
-    std::vector<double> standing_pose_;
-    std::vector<double> squat_pose_;
+        MotionState state_;
 
-    std::vector<double> desired_positions_;
+        std::vector<double> idle_pose_;
+        std::vector<double> standing_pose_;
+        std::vector<double> squat_pose_;
+
+        std::vector<double> desired_positions_;
+
+        double position_tolerance_;
 };

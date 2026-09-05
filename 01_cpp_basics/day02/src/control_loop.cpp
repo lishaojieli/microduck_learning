@@ -23,71 +23,72 @@ ControlLoop::ControlLoop(
 {
 }
 
+const char* motionStateToString(
+    MotionState state
+)
+{
+    switch (state)
+    {
+    case MotionState::Idle:
+        return "Idle";
+
+    case MotionState::Standing:
+        return "Standing";
+
+    case MotionState::Squatting:
+        return "Squatting";
+    }
+
+    return "Unknown";
+}
+
 void ControlLoop::run()
 {
-    auto start_time =
-        std::chrono::steady_clock::now();
+    auto start_time = std::chrono::steady_clock::now();
 
-    auto previous_time =
-        start_time;
+    auto previous_time = start_time;
 
-    for (int step = 0;
-         step < 300;
-         ++step)
+    for (int step = 0; step < 300; ++step)
     {
-        auto loop_start =
-            std::chrono::steady_clock::now();
+        auto loop_start = std::chrono::steady_clock::now();
 
         double dt = period_seconds_;
 
         if (step > 0)
         {
-            dt =
-                std::chrono::duration<double>(
-                    loop_start - previous_time
-                ).count();
+            dt = std::chrono::duration<double> (loop_start - previous_time).count();
         }
 
-        previous_time =
-            loop_start;
+        previous_time = loop_start;
 
-        double elapsed_time =
-            std::chrono::duration<double>(
-                loop_start - start_time
-            ).count();
+        double elapsed_time = std::chrono::duration<double> (loop_start - start_time).count();
 
-        // ① 更新运动状态
-        motion_manager_.update(
-            elapsed_time
-        );
+        RobotState state =
+            robot_.getState();
 
-        // ② 把当前动作目标交给 Controller
+        motion_manager_.update(state);
+
         controller_.setDesiredPositions(
             motion_manager_
                 .getDesiredPositions()
         );
 
-        // ③ 读取机器人状态
-        RobotState state =
-            robot_.getState();
-
-        // ④ 计算控制命令
         RobotCommand command =
             controller_
                 .computeCommand(state);
 
-        // ⑤ 下发控制命令
         robot_.setCommand(command);
 
-        // ⑥ 更新机器人
         robot_.update(dt);
 
         RobotState new_state =
             robot_.getState();
 
         std::cout
-            << "Time: "
-            << elapsed_time
+            << "State: "
+            << motionStateToString(
+                motion_manager_.getState()
+            )
             << " | Hip: "
             << new_state.positions[0]
             << " | Knee: "

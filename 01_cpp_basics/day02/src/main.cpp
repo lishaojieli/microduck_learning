@@ -8,8 +8,8 @@ int main()
     Robot robot;
 
     Controller controller(
-        0.5,
-        0.1
+        0.1,
+        0.0
     );
 
     MotionManager motion_manager;

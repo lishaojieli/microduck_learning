@@ -7,34 +7,53 @@
 enum class MotionState
 {
     Idle,
+
+    MovingToStanding,
     Standing,
+
+    MovingToSquat,
     Squatting
+};
+
+enum class MotionCommand
+{
+    None,
+    Stand,
+    Squat
 };
 
 class MotionManager
 {
-    public:
-        MotionManager();
+public:
+    MotionManager();
 
-        void update(const RobotState& state);
+    void setCommand(
+        MotionCommand command
+    );
 
-        const std::vector<double>& getDesiredPositions() const;
+    void update(
+        const RobotState& state
+    );
 
-        MotionState getState() const;
+    const std::vector<double>&
+    getDesiredPositions() const;
 
-    private:
-        bool isPoseReached(
-            const RobotState& state,
-            const std::vector<double>& target
-        ) const;
+    MotionState getState() const;
 
-        MotionState state_;
+private:
+    bool isPoseReached(
+        const RobotState& state,
+        const std::vector<double>& target
+    ) const;
 
-        std::vector<double> idle_pose_;
-        std::vector<double> standing_pose_;
-        std::vector<double> squat_pose_;
+    MotionState state_;
+    MotionCommand command_;
 
-        std::vector<double> desired_positions_;
+    std::vector<double> idle_pose_;
+    std::vector<double> standing_pose_;
+    std::vector<double> squat_pose_;
 
-        double position_tolerance_;
+    std::vector<double> desired_positions_;
+
+    double position_tolerance_;
 };

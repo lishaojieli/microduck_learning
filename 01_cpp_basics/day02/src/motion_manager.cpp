@@ -4,6 +4,7 @@
 
 MotionManager::MotionManager()
     : state_(MotionState::Idle),
+      command_(MotionCommand::None),
       idle_pose_
       {
           0.0,
@@ -36,6 +37,11 @@ MotionManager::MotionManager()
 {
 }
 
+void MotionManager::setCommand(MotionCommand command)
+{
+    command_ = command;
+}
+
 bool MotionManager::isPoseReached(
     const RobotState& state,
     const std::vector<double>& target
@@ -65,38 +71,37 @@ bool MotionManager::isPoseReached(
 
 void MotionManager::update(const RobotState& state)
 {
-    switch (state_)
+    switch (command_)
     {
-        case MotionState::Idle:
-
-            desired_positions_ = standing_pose_;
-
-            state_ = MotionState::Standing;
-
+        case MotionCommand::None:
             break;
 
-        case MotionState::Standing:
+        case MotionCommand::Stand:
 
             desired_positions_ = standing_pose_;
 
             if (isPoseReached(state, standing_pose_))
             {
-                desired_positions_ = squat_pose_;
-
-                state_ = MotionState::Squatting;
+                state_ = MotionState::Standing;
+            }
+            else
+            {
+                state_ = MotionState::MovingToStanding;
             }
 
             break;
 
-        case MotionState::Squatting:
+        case MotionCommand::Squat:
 
             desired_positions_ = squat_pose_;
 
             if (isPoseReached(state, squat_pose_))
             {
-                desired_positions_ = standing_pose_;
-
-                state_ = MotionState::Standing;
+                state_ = MotionState::Squatting;
+            }
+            else
+            {
+                state_ = MotionState::MovingToSquat;
             }
 
             break;

@@ -19,107 +19,74 @@ ControlLoop::ControlLoop(
       controller_(controller),
       motion_manager_(motion_manager),
       frequency_hz_(frequency_hz),
-      period_seconds_(1.0 / frequency_hz)
+      period_seconds_(1.0 / frequency_hz),
+      previous_time_(std::chrono::steady_clock::now())
 {
 }
 
-const char* motionStateToString(
-    MotionState state
-)
+const char* motionStateToString(MotionState state)
 {
     switch (state)
     {
-    case MotionState::Idle:
-        return "Idle";
+        case MotionState::Idle:
+            return "Idle";
 
-    case MotionState::Standing:
+        case MotionState::Standing:
         return "Standing";
 
-    case MotionState::Squatting:
-        return "Squatting";
+        case MotionState::MovingToStanding:
+            return "MovingToStanding";
+
+        case MotionState::MovingToSquat:
+            return "MovingToSquat";
+
+        case MotionState::Squatting:
+            return "Squatting";
     }
 
     return "Unknown";
 }
 
-void ControlLoop::run()
+void ControlLoop::step()
 {
-    auto start_time = std::chrono::steady_clock::now();
+    auto loop_start = std::chrono::steady_clock::now();
 
-    auto previous_time = start_time;
+    double dt = std::chrono::duration<double> (loop_start - previous_time_).count();
 
-    for (int step = 0; step < 300; ++step)
+    previous_time_ = loop_start;
+
+    RobotState state = robot_.getState();
+
+    motion_manager_.update(state);
+
+    controller_.setDesiredPositions(motion_manager_.getDesiredPositions());
+
+    RobotCommand command = controller_.computeCommand(state);
+
+    robot_.setCommand(command);
+
+    robot_.update(dt);
+
+    std::cout
+        << "Motion state: "
+        << motionStateToString(motion_manager_.getState())
+        << std::endl;
+
+    auto loop_end = std::chrono::steady_clock::now();
+
+    double computation_time = std::chrono::duration<double> (loop_end - loop_start).count();
+
+    double sleep_time = period_seconds_ - computation_time;
+
+    if (sleep_time > 0.0)
     {
-        auto loop_start = std::chrono::steady_clock::now();
-
-        double dt = period_seconds_;
-
-        if (step > 0)
-        {
-            dt = std::chrono::duration<double> (loop_start - previous_time).count();
-        }
-
-        previous_time = loop_start;
-
-        double elapsed_time = std::chrono::duration<double> (loop_start - start_time).count();
-
-        RobotState state =
-            robot_.getState();
-
-        motion_manager_.update(state);
-
-        controller_.setDesiredPositions(
-            motion_manager_
-                .getDesiredPositions()
-        );
-
-        RobotCommand command =
-            controller_
-                .computeCommand(state);
-
-        robot_.setCommand(command);
-
-        robot_.update(dt);
-
-        RobotState new_state =
-            robot_.getState();
-
+        std::this_thread::sleep_for(std::chrono::duration<double> (sleep_time));
+    }
+    else
+    {
         std::cout
-            << "State: "
-            << motionStateToString(
-                motion_manager_.getState()
-            )
-            << " | Hip: "
-            << new_state.positions[0]
-            << " | Knee: "
-            << new_state.positions[1]
+            << "Warning: control loop overrun!"
             << std::endl;
-
-        auto loop_end =
-            std::chrono::steady_clock::now();
-
-        double computation_time =
-            std::chrono::duration<double>(
-                loop_end - loop_start
-            ).count();
-
-        double sleep_time =
-            period_seconds_
-            - computation_time;
-
-        if (sleep_time > 0.0)
-        {
-            std::this_thread::sleep_for(
-                std::chrono::duration<double>(
-                    sleep_time
-                )
-            );
-        }
-        else
-        {
-            std::cout
-                << "Warning: control loop overrun!"
-                << std::endl;
-        }
     }
 }
+

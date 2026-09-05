@@ -21,7 +21,32 @@ int main()
         50.0
     );
 
-    loop.run();
+    motion_manager.setCommand(
+        MotionCommand::Stand
+    );
+
+    for (int i = 0; i < 150; ++i)
+    {
+        loop.step();
+    }
+
+    motion_manager.setCommand(
+        MotionCommand::Squat
+    );
+
+    for (int i = 0; i < 150; ++i)
+    {
+        loop.step();
+    }
+
+    motion_manager.setCommand(
+        MotionCommand::Stand
+    );
+
+    for (int i = 0; i < 150; ++i)
+    {
+        loop.step();
+    }
 
     return 0;
 }

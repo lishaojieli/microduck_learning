@@ -37,8 +37,12 @@ MotionManager::MotionManager()
 {
 }
 
-void MotionManager::setCommand(MotionCommand command)
+void MotionManager::setCommand(
+    MotionCommand command
+)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+
     command_ = command;
 }
 
@@ -69,51 +73,72 @@ bool MotionManager::isPoseReached(
     return true;
 }
 
-void MotionManager::update(const RobotState& state)
+void MotionManager::update(
+    const RobotState& state
+)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+
     switch (command_)
     {
-        case MotionCommand::None:
-            break;
+    case MotionCommand::None:
+        break;
 
-        case MotionCommand::Stand:
+    case MotionCommand::Stand:
 
-            desired_positions_ = standing_pose_;
+        desired_positions_ =
+            standing_pose_;
 
-            if (isPoseReached(state, standing_pose_))
-            {
-                state_ = MotionState::Standing;
-            }
-            else
-            {
-                state_ = MotionState::MovingToStanding;
-            }
+        if (isPoseReached(
+                state,
+                standing_pose_
+            ))
+        {
+            state_ =
+                MotionState::Standing;
+        }
+        else
+        {
+            state_ =
+                MotionState::MovingToStanding;
+        }
 
-            break;
+        break;
 
-        case MotionCommand::Squat:
+    case MotionCommand::Squat:
 
-            desired_positions_ = squat_pose_;
+        desired_positions_ =
+            squat_pose_;
 
-            if (isPoseReached(state, squat_pose_))
-            {
-                state_ = MotionState::Squatting;
-            }
-            else
-            {
-                state_ = MotionState::MovingToSquat;
-            }
+        if (isPoseReached(
+                state,
+                squat_pose_
+            ))
+        {
+            state_ =
+                MotionState::Squatting;
+        }
+        else
+        {
+            state_ =
+                MotionState::MovingToSquat;
+        }
 
-            break;
+        break;
     }
 }
 
-const std::vector<double>& MotionManager::getDesiredPositions() const
+std::vector<double>
+MotionManager::getDesiredPositions() const
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+
     return desired_positions_;
 }
 
 MotionState MotionManager::getState() const
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+
     return state_;
 }

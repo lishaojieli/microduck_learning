@@ -41,8 +41,6 @@ void MotionManager::setCommand(
     MotionCommand command
 )
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-
     command_ = command;
 }
 
@@ -77,7 +75,6 @@ void MotionManager::update(
     const RobotState& state
 )
 {
-    std::lock_guard<std::mutex> lock(mutex_);
 
     switch (command_)
     {
@@ -128,17 +125,13 @@ void MotionManager::update(
     }
 }
 
-std::vector<double>
+const std::vector<double>&
 MotionManager::getDesiredPositions() const
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-
     return desired_positions_;
 }
 
 MotionState MotionManager::getState() const
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-
     return state_;
 }

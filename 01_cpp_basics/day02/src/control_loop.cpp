@@ -59,12 +59,12 @@ const char* motionStateToString(MotionState state)
 
 void ControlLoop::run()
 {
-    int step = 0;
-
     running_ = true;
 
     auto previous_time =
         std::chrono::steady_clock::now();
+
+    int step = 0;
 
     while (running_)
     {
@@ -76,36 +76,52 @@ void ControlLoop::run()
                 loop_start - previous_time
             ).count();
 
-        previous_time = loop_start;
+        previous_time =
+            loop_start;
 
         RobotState state =
             robot_.getState();
 
+        // 每轮最多处理一个高层命令
         MotionCommand motion_command =
-            mailbox_.getCommand();
+            mailbox_.takeCommand();
 
-        motion_manager_.setCommand(
-            motion_command
-        );
+        if (motion_command !=
+            MotionCommand::None)
+        {
+            motion_manager_.setCommand(
+                motion_command
+            );
+        }
 
         motion_manager_.update(
             state
         );
 
         controller_.setDesiredPositions(
-            motion_manager_.getDesiredPositions()
+            motion_manager_
+                .getDesiredPositions()
         );
 
         RobotCommand robot_command =
-            controller_.computeCommand(
-                state
-            );
+            controller_
+                .computeCommand(state);
 
         robot_.setCommand(
             robot_command
         );
 
         robot_.update(dt);
+
+        if (step % 10 == 0)
+        {
+            std::cout
+                << "Queue size: "
+                << mailbox_.size()
+                << std::endl;
+        }
+
+        ++step;
 
         auto loop_end =
             std::chrono::steady_clock::now();
@@ -133,20 +149,8 @@ void ControlLoop::run()
                 << "Warning: control loop overrun!"
                 << std::endl;
         }
-    if (step % 10 == 0)
-    {
-        std::cout
-            << "Motion state: "
-            << motionStateToString(
-                motion_manager_.getState()
-            )
-            << std::endl;
-    }
-
-    ++step;
     }
 }
-
 void ControlLoop::stop()
 {
     running_ = false;

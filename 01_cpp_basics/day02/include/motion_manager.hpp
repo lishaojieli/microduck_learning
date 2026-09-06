@@ -2,7 +2,6 @@
 
 #include "robot.hpp"
 
-#include <mutex>
 #include <vector>
 
 enum class MotionState
@@ -34,7 +33,7 @@ public:
         const RobotState& state
     );
 
-    std::vector<double>
+    const std::vector<double>&
     getDesiredPositions() const;
 
     MotionState getState() const;
@@ -56,5 +55,4 @@ private:
 
     double position_tolerance_;
 
-    mutable std::mutex mutex_;
 };

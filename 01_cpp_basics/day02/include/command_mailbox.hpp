@@ -2,21 +2,31 @@
 
 #include "motion_manager.hpp"
 
+#include <cstddef>
 #include <mutex>
+#include <queue>
 
 class CommandMailbox
 {
 public:
-    CommandMailbox();
+    explicit CommandMailbox(
+        std::size_t max_size = 10
+    );
 
-    void setCommand(
+    bool pushCommand(
         MotionCommand command
     );
 
-    MotionCommand getCommand() const;
+    MotionCommand takeCommand();
+
+    std::size_t size() const;
+
+    bool empty() const;
 
 private:
-    MotionCommand command_;
+    std::queue<MotionCommand> commands_;
+
+    std::size_t max_size_;
 
     mutable std::mutex mutex_;
 };

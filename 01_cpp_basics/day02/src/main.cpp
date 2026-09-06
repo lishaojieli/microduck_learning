@@ -48,27 +48,43 @@ int main()
 
         if (key == 's')
         {
-            mailbox.setCommand(
-                MotionCommand::Stand
-            );
+            bool success =
+                mailbox.pushCommand(
+                    MotionCommand::Stand
+                );
 
-            std::cout
-                << "Command: Stand"
-                << std::endl;
+            if (success)
+            {
+                std::cout
+                    << "Command queued: Stand"
+                    << std::endl;
+            }
+            else
+            {
+                std::cout
+                    << "Command queue full!"
+                    << std::endl;
+            }
         }
         else if (key == 'q')
         {
-            mailbox.setCommand(
-                MotionCommand::Squat
-            );
+            bool success =
+                mailbox.pushCommand(
+                    MotionCommand::Squat
+                );
 
-            std::cout
-                << "Command: Squat"
-                << std::endl;
-        }
-        else if (key == 'x')
-        {
-            break;
+            if (success)
+            {
+                std::cout
+                    << "Command queued: Squat"
+                    << std::endl;
+            }
+            else
+            {
+                std::cout
+                    << "Command queue full!"
+                    << std::endl;
+            }
         }
     }
 

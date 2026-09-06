@@ -4,27 +4,30 @@
 #include "motion_manager.hpp"
 #include "robot.hpp"
 
+#include <atomic>
 #include <chrono>
 
 class ControlLoop
 {
-    public:
-        ControlLoop(
-            Robot& robot,
-            Controller& controller,
-            MotionManager& motion_manager,
-            double frequency_hz
-        );
+public:
+    ControlLoop(
+        Robot& robot,
+        Controller& controller,
+        MotionManager& motion_manager,
+        double frequency_hz
+    );
 
-        void step();
+    void run();
 
-    private:
-        Robot& robot_;
-        Controller& controller_;
-        MotionManager& motion_manager_;
+    void stop();
 
-        double frequency_hz_;
-        double period_seconds_;
+private:
+    Robot& robot_;
+    Controller& controller_;
+    MotionManager& motion_manager_;
 
-        std::chrono::steady_clock::time_point previous_time_;
+    double frequency_hz_;
+    double period_seconds_;
+
+    std::atomic<bool> running_;
 };

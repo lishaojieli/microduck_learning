@@ -3,6 +3,14 @@
 #include "motion_manager.hpp"
 #include "robot.hpp"
 
+#include "control_loop.hpp"
+#include "controller.hpp"
+#include "motion_manager.hpp"
+#include "robot.hpp"
+
+#include <iostream>
+#include <thread>
+
 int main()
 {
     Robot robot;
@@ -21,32 +29,75 @@ int main()
         50.0
     );
 
-    motion_manager.setCommand(
-        MotionCommand::Stand
+    // 控制循环放到单独线程
+    std::thread control_thread(
+        [&loop]()
+        {
+            loop.run();
+        }
     );
 
-    for (int i = 0; i < 150; ++i)
+    std::cout
+        << "Keyboard Control"
+        << std::endl;
+
+    std::cout
+        << "s : Stand"
+        << std::endl;
+
+    std::cout
+        << "q : Squat"
+        << std::endl;
+
+    std::cout
+        << "x : Exit"
+        << std::endl;
+
+    char key;
+
+    while (true)
     {
-        loop.step();
+        std::cin >> key;
+
+        if (key == 's')
+        {
+            motion_manager.setCommand(
+                MotionCommand::Stand
+            );
+
+            std::cout
+                << "Command: Stand"
+                << std::endl;
+        }
+        else if (key == 'q')
+        {
+            motion_manager.setCommand(
+                MotionCommand::Squat
+            );
+
+            std::cout
+                << "Command: Squat"
+                << std::endl;
+        }
+        else if (key == 'x')
+        {
+            std::cout
+                << "Exiting..."
+                << std::endl;
+
+            break;
+        }
+        else
+        {
+            std::cout
+                << "Unknown command"
+                << std::endl;
+        }
     }
 
-    motion_manager.setCommand(
-        MotionCommand::Squat
-    );
+    loop.stop();
 
-    for (int i = 0; i < 150; ++i)
-    {
-        loop.step();
-    }
-
-    motion_manager.setCommand(
-        MotionCommand::Stand
-    );
-
-    for (int i = 0; i < 150; ++i)
-    {
-        loop.step();
-    }
+    control_thread.join();
 
     return 0;
 }

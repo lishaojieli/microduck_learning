@@ -12,6 +12,7 @@ add_executable(
     src/controller.cpp
     src/control_loop.cpp
     src/motion_manager.cpp
+    src/command_mailbox.cpp
 )
 
 target_include_directories(

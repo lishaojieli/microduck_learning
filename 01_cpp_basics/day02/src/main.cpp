@@ -1,8 +1,4 @@
-#include "control_loop.hpp"
-#include "controller.hpp"
-#include "motion_manager.hpp"
-#include "robot.hpp"
-
+#include "command_mailbox.hpp"
 #include "control_loop.hpp"
 #include "controller.hpp"
 #include "motion_manager.hpp"
@@ -22,14 +18,16 @@ int main()
 
     MotionManager motion_manager;
 
+    CommandMailbox mailbox;
+
     ControlLoop loop(
         robot,
         controller,
         motion_manager,
+        mailbox,
         50.0
     );
 
-    // 控制循环放到单独线程
     std::thread control_thread(
         [&loop]()
         {
@@ -38,20 +36,9 @@ int main()
     );
 
     std::cout
-        << "Keyboard Control"
-        << std::endl;
-
-    std::cout
-        << "s : Stand"
-        << std::endl;
-
-    std::cout
-        << "q : Squat"
-        << std::endl;
-
-    std::cout
-        << "x : Exit"
-        << std::endl;
+        << "s : Stand\n"
+        << "q : Squat\n"
+        << "x : Exit\n";
 
     char key;
 
@@ -61,7 +48,7 @@ int main()
 
         if (key == 's')
         {
-            motion_manager.setCommand(
+            mailbox.setCommand(
                 MotionCommand::Stand
             );
 
@@ -71,7 +58,7 @@ int main()
         }
         else if (key == 'q')
         {
-            motion_manager.setCommand(
+            mailbox.setCommand(
                 MotionCommand::Squat
             );
 
@@ -81,17 +68,7 @@ int main()
         }
         else if (key == 'x')
         {
-            std::cout
-                << "Exiting..."
-                << std::endl;
-
             break;
-        }
-        else
-        {
-            std::cout
-                << "Unknown command"
-                << std::endl;
         }
     }
 

@@ -19,20 +19,17 @@ ControlLoop::ControlLoop(
     Robot& robot,
     Controller& controller,
     MotionManager& motion_manager,
+    CommandMailbox& mailbox,
     double frequency_hz
 )
     : robot_(robot),
       controller_(controller),
       motion_manager_(motion_manager),
+      mailbox_(mailbox),
       frequency_hz_(frequency_hz),
       period_seconds_(1.0 / frequency_hz),
       running_(false)
 {
-}
-
-void ControlLoop::stop()
-{
-    running_ = false;
 }
 
 
@@ -84,18 +81,29 @@ void ControlLoop::run()
         RobotState state =
             robot_.getState();
 
-        motion_manager_.update(state);
+        MotionCommand motion_command =
+            mailbox_.getCommand();
 
-        controller_.setDesiredPositions(
-            motion_manager_
-                .getDesiredPositions()
+        motion_manager_.setCommand(
+            motion_command
         );
 
-        RobotCommand command =
-            controller_
-                .computeCommand(state);
+        motion_manager_.update(
+            state
+        );
 
-        robot_.setCommand(command);
+        controller_.setDesiredPositions(
+            motion_manager_.getDesiredPositions()
+        );
+
+        RobotCommand robot_command =
+            controller_.computeCommand(
+                state
+            );
+
+        robot_.setCommand(
+            robot_command
+        );
 
         robot_.update(dt);
 
@@ -125,16 +133,21 @@ void ControlLoop::run()
                 << "Warning: control loop overrun!"
                 << std::endl;
         }
-        if (step % 10 == 0)
-        {
-            std::cout
-                << "Motion state: "
-                << motionStateToString(
-                    motion_manager_.getState()
-                )
-                << std::endl;
-        }
-
-        ++step;
+    if (step % 10 == 0)
+    {
+        std::cout
+            << "Motion state: "
+            << motionStateToString(
+                motion_manager_.getState()
+            )
+            << std::endl;
     }
+
+    ++step;
+    }
+}
+
+void ControlLoop::stop()
+{
+    running_ = false;
 }

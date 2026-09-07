@@ -4,10 +4,13 @@
 
 SafetyMonitor::SafetyMonitor(
     double max_joint_velocity,
-    double max_pitch
+    double max_pitch,
+    double reset_max_joint_velocity
 )
     : max_joint_velocity_(max_joint_velocity),
       max_pitch_(max_pitch),
+      reset_max_joint_velocity_(reset_max_joint_velocity),
+
       fault_state_(SafetyState::Safe)
 {
 }
@@ -45,13 +48,45 @@ SafetyState SafetyMonitor::check(
 
     return SafetyState::Safe;
 }
-void SafetyMonitor::reset()
+
+bool SafetyMonitor::reset(
+    const RobotState& state
+)
 {
+    if (!canReset(state))
+    {
+        return false;
+    }
+
     fault_state_ =
         SafetyState::Safe;
+
+    return true;
 }
 
 SafetyState SafetyMonitor::getState() const
 {
     return fault_state_;
+}
+
+bool SafetyMonitor::canReset(
+    const RobotState& state
+) const
+{
+    for (double velocity : state.velocities)
+    {
+        if (std::abs(velocity) >
+            max_joint_velocity_)
+        {
+            return false;
+        }
+    }
+
+    if (std::abs(state.imu.pitch) >
+        max_pitch_)
+    {
+        return false;
+    }
+
+    return true;
 }

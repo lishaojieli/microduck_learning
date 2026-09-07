@@ -23,7 +23,8 @@ int main()
 
     SafetyMonitor safety_monitor(
         0.1,   // max joint velocity rad/s
-        0.1    // max pitch rad
+        0.1,    // max pitch rad
+        0.1
     );
 
     ControlLoop loop(

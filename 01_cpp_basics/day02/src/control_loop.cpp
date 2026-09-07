@@ -119,11 +119,26 @@ void ControlLoop::run()
 
         if (motion_command == MotionCommand::Reset)
         {
-            safety_monitor_.reset();
+            bool reset_success =
+                safety_monitor_.reset(state);
 
-            motion_manager_.setCommand(
-                MotionCommand::Reset
-            );
+            if (reset_success)
+            {
+                std::cout
+                    << "Safety reset successful"
+                    << std::endl;
+
+                motion_manager_.setCommand(
+                    MotionCommand::Reset
+                );
+            }
+            else
+            {
+                std::cout
+                    << "Safety reset rejected: "
+                    << "robot is still unsafe"
+                    << std::endl;
+            }
         }
         else
         {
@@ -136,7 +151,9 @@ void ControlLoop::run()
                     MotionCommand::EmergencyStop
                 );
             }
-            else if (motion_command != MotionCommand::None)
+            else if (
+                motion_command != MotionCommand::None
+            )
             {
                 motion_manager_.setCommand(
                     motion_command

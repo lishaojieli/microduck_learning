@@ -20,9 +20,15 @@ public:
 
     SafetyState check(
         const RobotState& state
-    ) const;
+    );
+
+    void reset();
+
+    SafetyState getState() const;
 
 private:
     double max_joint_velocity_;
     double max_pitch_;
+
+    SafetyState fault_state_;
 };

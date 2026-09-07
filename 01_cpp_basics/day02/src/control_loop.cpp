@@ -93,6 +93,8 @@ void ControlLoop::run()
 {
     running_ = true;
 
+    int step = 0;
+
     auto previous_time =
         std::chrono::steady_clock::now();
 
@@ -112,28 +114,29 @@ void ControlLoop::run()
         RobotState state =
             robot_.getState();
 
-        SafetyState safety_state =
-            safety_monitor_.check(state);
+        MotionCommand motion_command =
+            mailbox_.takeCommand();
 
-        if (safety_state != SafetyState::Safe)
+        if (motion_command == MotionCommand::Reset)
         {
-            std::cout
-                << "SAFETY FAULT: "
-                << safetyStateToString(
-                    safety_state
-                )
-                << std::endl;
+            safety_monitor_.reset();
+
             motion_manager_.setCommand(
-                MotionCommand::EmergencyStop
+                MotionCommand::Reset
             );
         }
         else
         {
-            MotionCommand motion_command =
-                mailbox_.takeCommand();
+            SafetyState safety_state =
+                safety_monitor_.check(state);
 
-            if (motion_command !=
-                MotionCommand::None)
+            if (safety_state != SafetyState::Safe)
+            {
+                motion_manager_.setCommand(
+                    MotionCommand::EmergencyStop
+                );
+            }
+            else if (motion_command != MotionCommand::None)
             {
                 motion_manager_.setCommand(
                     motion_command
@@ -187,6 +190,18 @@ void ControlLoop::run()
                 << "Warning: control loop overrun!"
                 << std::endl;
         }
+
+        if (step % 10 == 0)
+        {
+            std::cout
+                << "Safety state: "
+                << safetyStateToString(
+                    safety_monitor_.getState()
+                )
+                << std::endl;
+        }
+
+        ++step;
     }
 }
 

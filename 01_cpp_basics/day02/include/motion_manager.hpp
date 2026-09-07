@@ -10,14 +10,19 @@ enum class MotionState
     MovingToStanding,
     Standing,
     MovingToSquat,
-    Squatting
+    Squatting,
+    Stopped,
+    EmergencyStopped
 };
 
 enum class MotionCommand
 {
     None,
     Stand,
-    Squat
+    Squat,
+    Stop,
+    EmergencyStop,
+    Reset
 };
 
 class MotionManager
@@ -50,7 +55,7 @@ private:
     std::vector<double> idle_pose_;
     std::vector<double> standing_pose_;
     std::vector<double> squat_pose_;
-
+    std::vector<double> stopped_pose_;
     std::vector<double> desired_positions_;
 
     double position_tolerance_;

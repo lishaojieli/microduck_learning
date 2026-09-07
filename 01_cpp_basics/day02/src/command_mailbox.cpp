@@ -13,9 +13,22 @@ bool CommandMailbox::pushCommand(
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
+    if (command == MotionCommand::EmergencyStop ||
+        command == MotionCommand::Reset)
+    {
+        while (!commands_.empty())
+        {
+            commands_.pop();
+        }
+
+        commands_.push(command);
+
+        return true;
+    }
+
     if (commands_.size() >= max_size_)
     {
-        return false;
+        commands_.pop();
     }
 
     commands_.push(command);

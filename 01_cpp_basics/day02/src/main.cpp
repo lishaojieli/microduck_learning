@@ -3,6 +3,7 @@
 #include "controller.hpp"
 #include "motion_manager.hpp"
 #include "robot.hpp"
+#include "safety_monitor.hpp"
 
 #include <iostream>
 #include <thread>
@@ -12,7 +13,7 @@ int main()
     Robot robot;
 
     Controller controller(
-        0.1,
+        1,
         0.0
     );
 
@@ -20,14 +21,19 @@ int main()
 
     CommandMailbox mailbox;
 
+    SafetyMonitor safety_monitor(
+        0.1,   // max joint velocity rad/s
+        0.1    // max pitch rad
+    );
+
     ControlLoop loop(
         robot,
         controller,
         motion_manager,
         mailbox,
+        safety_monitor,
         50.0
     );
-
     std::thread control_thread(
         [&loop]()
         {
@@ -48,43 +54,62 @@ int main()
 
         if (key == 's')
         {
-            bool success =
-                mailbox.pushCommand(
-                    MotionCommand::Stand
-                );
-
-            if (success)
-            {
-                std::cout
-                    << "Command queued: Stand"
-                    << std::endl;
-            }
-            else
-            {
-                std::cout
-                    << "Command queue full!"
-                    << std::endl;
-            }
+            mailbox.pushCommand(
+                MotionCommand::Stand
+            );
+        std::cout
+            << "Queued Stand"
+            << " | Queue size: "
+            << mailbox.size()
+            << std::endl;
         }
         else if (key == 'q')
         {
-            bool success =
-                mailbox.pushCommand(
-                    MotionCommand::Squat
-                );
-
-            if (success)
-            {
-                std::cout
-                    << "Command queued: Squat"
-                    << std::endl;
-            }
-            else
-            {
-                std::cout
-                    << "Command queue full!"
-                    << std::endl;
-            }
+            mailbox.pushCommand(
+                MotionCommand::Squat
+            );
+        std::cout
+            << "Queued Squat"
+            << " | Queue size: "
+            << mailbox.size()
+            << std::endl;
+        }
+        else if (key == 'p')
+        {
+            mailbox.pushCommand(
+                MotionCommand::Stop
+            );
+        std::cout
+            << "Queued Stop"
+            << " | Queue size: "
+            << mailbox.size()
+            << std::endl;
+        }
+        else if (key == 'e')
+        {
+            mailbox.pushCommand(
+                MotionCommand::EmergencyStop
+            );
+        std::cout
+            << "Queued EmergencyStop"
+            << " | Queue size: "
+            << mailbox.size()
+            << std::endl;
+        }
+        else if (key == 'r')
+        {
+            mailbox.pushCommand(
+                MotionCommand::Reset
+            );
+        std::cout
+            << "Queued Reset"
+            << " | Queue size: "
+            << mailbox.size()
+            << std::endl;
+        }
+        else if (key == 'x')
+        {
+            break;
         }
     }
 

@@ -75,11 +75,27 @@ void MotionManager::update(
     const RobotState& state
 )
 {
+    // EmergencyStopped 是锁存状态
+    if (state_ == MotionState::EmergencyStopped)
+    {
+        if (command_ == MotionCommand::Reset)
+        {
+            state_ = MotionState::Idle;
+
+            command_ = MotionCommand::None;
+
+            desired_positions_ =
+                state.positions;
+        }
+
+        return;
+    }
 
     switch (command_)
     {
     case MotionCommand::None:
         break;
+
 
     case MotionCommand::Stand:
 
@@ -102,6 +118,7 @@ void MotionManager::update(
 
         break;
 
+
     case MotionCommand::Squat:
 
         desired_positions_ =
@@ -120,6 +137,46 @@ void MotionManager::update(
             state_ =
                 MotionState::MovingToSquat;
         }
+
+        break;
+
+
+    case MotionCommand::Stop:
+
+        stopped_pose_ =
+            state.positions;
+
+        desired_positions_ =
+            stopped_pose_;
+
+        state_ =
+            MotionState::Stopped;
+
+        command_ =
+            MotionCommand::None;
+
+        break;
+
+
+    case MotionCommand::EmergencyStop:
+
+        desired_positions_ =
+            state.positions;
+
+        state_ =
+            MotionState::EmergencyStopped;
+
+        command_ =
+            MotionCommand::None;
+
+        break;
+
+
+    case MotionCommand::Reset:
+
+        // 非急停状态下 Reset 暂时不做任何事
+        command_ =
+            MotionCommand::None;
 
         break;
     }

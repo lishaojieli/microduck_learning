@@ -4,6 +4,7 @@
 #include "controller.hpp"
 #include "motion_manager.hpp"
 #include "robot.hpp"
+#include "safety_monitor.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -20,12 +21,14 @@ ControlLoop::ControlLoop(
     Controller& controller,
     MotionManager& motion_manager,
     CommandMailbox& mailbox,
+    SafetyMonitor& safety_monitor,
     double frequency_hz
 )
     : robot_(robot),
       controller_(controller),
       motion_manager_(motion_manager),
       mailbox_(mailbox),
+      safety_monitor_(safety_monitor),
       frequency_hz_(frequency_hz),
       period_seconds_(1.0 / frequency_hz),
       running_(false)
@@ -33,25 +36,54 @@ ControlLoop::ControlLoop(
 }
 
 
-
-const char* motionStateToString(MotionState state)
+const char* motionStateToString(
+    MotionState state
+)
 {
     switch (state)
     {
-        case MotionState::Idle:
-            return "Idle";
+    case MotionState::Idle:
+        return "Idle";
 
-        case MotionState::Standing:
+    case MotionState::MovingToStanding:
+        return "MovingToStanding";
+
+    case MotionState::Standing:
         return "Standing";
 
-        case MotionState::MovingToStanding:
-            return "MovingToStanding";
+    case MotionState::MovingToSquat:
+        return "MovingToSquat";
 
-        case MotionState::MovingToSquat:
-            return "MovingToSquat";
+    case MotionState::Squatting:
+        return "Squatting";
 
-        case MotionState::Squatting:
-            return "Squatting";
+    case MotionState::Stopped:
+        return "Stopped";
+
+    case MotionState::EmergencyStopped:
+        return "EMERGENCY STOPPED";
+    }
+
+    return "Unknown";
+}
+
+const char* safetyStateToString(
+    SafetyState state
+)
+{
+    switch (state)
+    {
+    case SafetyState::Safe:
+        return "Safe";
+
+    case SafetyState::JointPositionFault:
+        return "JointPositionFault";
+
+    case SafetyState::JointVelocityFault:
+        return "JointVelocityFault";
+
+    case SafetyState::TiltFault:
+        return "TiltFault";
     }
 
     return "Unknown";
@@ -63,8 +95,6 @@ void ControlLoop::run()
 
     auto previous_time =
         std::chrono::steady_clock::now();
-
-    int step = 0;
 
     while (running_)
     {
@@ -82,16 +112,33 @@ void ControlLoop::run()
         RobotState state =
             robot_.getState();
 
-        // 每轮最多处理一个高层命令
-        MotionCommand motion_command =
-            mailbox_.takeCommand();
+        SafetyState safety_state =
+            safety_monitor_.check(state);
 
-        if (motion_command !=
-            MotionCommand::None)
+        if (safety_state != SafetyState::Safe)
         {
+            std::cout
+                << "SAFETY FAULT: "
+                << safetyStateToString(
+                    safety_state
+                )
+                << std::endl;
             motion_manager_.setCommand(
-                motion_command
+                MotionCommand::EmergencyStop
             );
+        }
+        else
+        {
+            MotionCommand motion_command =
+                mailbox_.takeCommand();
+
+            if (motion_command !=
+                MotionCommand::None)
+            {
+                motion_manager_.setCommand(
+                    motion_command
+                );
+            }
         }
 
         motion_manager_.update(
@@ -113,15 +160,6 @@ void ControlLoop::run()
 
         robot_.update(dt);
 
-        if (step % 10 == 0)
-        {
-            std::cout
-                << "Queue size: "
-                << mailbox_.size()
-                << std::endl;
-        }
-
-        ++step;
 
         auto loop_end =
             std::chrono::steady_clock::now();
@@ -151,6 +189,7 @@ void ControlLoop::run()
         }
     }
 }
+
 void ControlLoop::stop()
 {
     running_ = false;

@@ -4,6 +4,7 @@
 #include "motion_manager.hpp"
 #include "robot.hpp"
 #include "command_mailbox.hpp"
+#include "safety_monitor.hpp"
 
 #include <atomic>
 #include <chrono>
@@ -16,6 +17,7 @@ public:
         Controller& controller,
         MotionManager& motion_manager,
         CommandMailbox& mailbox,
+        SafetyMonitor& safety_monitor,
         double frequency_hz
     );
 
@@ -30,6 +32,8 @@ private:
 
     double frequency_hz_;
     double period_seconds_;
+    
+    SafetyMonitor& safety_monitor_;
 
     std::atomic<bool> running_;
 };
